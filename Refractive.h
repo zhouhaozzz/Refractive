@@ -33,6 +33,7 @@ public:
 	void Forward_process(const char* Output_file, int jishu, double Energy, double Sample_thickness = 300e-6, double dx = 1e-6);//正解得到观测量随时间的变化
 	void Reverse_process(const char* Output_file, double Sample_thickness = 300e-6, double dx = 1e-6);//反解得到泵浦X射线的能量通量随时间的变化
 	double lifetime(string Element, double rho);
+	void Material_Parameter(string Material);
 	string inttoStr(int s);
 
 
@@ -45,6 +46,10 @@ public:
 
 
 	string Element;
+	double a[3];                             //带隙参数
+	double vs;                               //声速 m/s
+	double tao;                               // electron-phonon collision time s
+	double G;                               // electron–phonon coupling constant (W/m3K)
 	double n_s			= 2.21e28;			//单位体积内的分子数(/m^3)
 
 	double Phy_0		= 10519.530989251682;	//初始相位

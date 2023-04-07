@@ -63,12 +63,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 					if (i != 0 && i != (thick_size - 1))
 					{
 						T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-							+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+							+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_l[i];
 
 						T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 							+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-							- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+							- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_e[i];
 					}
 					//在边界上的情况(第一类边界条件)
@@ -77,23 +77,23 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						if (i == 0)
 						{
 							T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 						else
 						{
 							T_l_new[i] = (this->k_l * (300. - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 					}
@@ -104,7 +104,7 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						+ this->n_electron[i];
 
 					//4,带隙
-					double E_gap = (1.519 - (5.405e-4) * T_l_new[i] * T_l_new[i] / (T_l_new[i] + 204)) * e_0;
+					double E_gap = (this->a[0] - this->a[1] * T_l_new[i] * T_l_new[i] / (T_l_new[i] + this->a[2])) * e_0;
 
 					//5,6,Ec和Ev
 					double E_c = E_gap / 2 + m_r * (hbar * this->omega_detec - E_gap) / this->m_c;
@@ -155,12 +155,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 					if (i != 0 && i != (thick_size - 1))
 					{
 						T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-							+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+							+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_l[i];
 
 						T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 							+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-							- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+							- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_e[i];
 					}
 					//在边界上的情况(第一类边界条件)
@@ -169,23 +169,23 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						if (i == 0)
 						{
 							T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 						else
 						{
 							T_l_new[i] = (this->k_l * (300. - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 					}
@@ -196,7 +196,7 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						+ this->n_electron[i];
 
 					//4,带隙
-					double E_gap = (1.519 - (5.405e-4) * T_l_new[i] * T_l_new[i] / (T_l_new[i] + 204)) * e_0;
+					double E_gap = (this->a[0] - this->a[1] * T_l_new[i] * T_l_new[i] / (T_l_new[i] + this->a[2])) * e_0;
 
 					//5,6,Ec和Ev
 					double E_c = E_gap / 2 + m_r * (hbar * this->omega_detec - E_gap) / this->m_c;
@@ -257,12 +257,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						if (i != 0 && i != (thick_size - 1))
 						{
 							T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 						//在边界上的情况(第一类边界条件)
@@ -271,12 +271,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 							if (i == 0)
 							{
 								T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-									+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+									+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_l[i];
 
 								T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 							else
@@ -287,7 +287,7 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 
 								T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 						}
@@ -298,7 +298,7 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 							+ this->n_electron[i];
 
 						//4,带隙
-						double E_gap = (1.519 - (5.405e-4) * T_l_new[i] * T_l_new[i] / (T_l_new[i] + 204)) * e_0;
+						double E_gap = (this->a[0] - this->a[1] * T_l_new[i] * T_l_new[i] / (T_l_new[i] + this->a[2])) * e_0;
 
 						//5,6,Ec和Ev
 						double E_c = E_gap / 2 + m_r * (hbar * this->omega_detec - E_gap) / this->m_c;
@@ -357,12 +357,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						if (i != 0 && i != (thick_size - 1))
 						{
 							T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 						//在边界上的情况(第一类边界条件)
@@ -371,23 +371,23 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 							if (i == 0)
 							{
 								T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-									+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+									+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_l[i];
 
 								T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 							else
 							{
 								T_l_new[i] = (this->k_l * (300. - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-									+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+									+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_l[i];
 
 								T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 						}
@@ -409,12 +409,12 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 						if (i != 0 && i != (thick_size - 1))
 						{
 							T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-								+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+								+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_l[i];
 
 							T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 								+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-								- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+								- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 								+ this->T_e[i];
 						}
 						//在边界上的情况(第一类边界条件)
@@ -423,23 +423,23 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 							if (i == 0)
 							{
 								T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-									+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+									+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_l[i];
 
 								T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 							else
 							{
 								T_l_new[i] = (this->k_l * (300. - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-									+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+									+ (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_l[i];
 
 								T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 									+ this->lamda3 * this->n_s * this->sigma * flux * exp(-this->n_s * this->sigma * (i)*this->dx)
-									- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+									- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 									+ this->T_e[i];
 							}
 						}
@@ -450,6 +450,7 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 					}
 					break;
 				}
+				
 			}
 			this->Flux_Data[t] = (flux1 + flux2) / 2.;
 
@@ -464,7 +465,8 @@ void Refractive::Reverse_process(const char* Output_file, double Sample_thicknes
 			output << t * dt << " " << this->Flux_Data[t] << std::endl;
 			
 
-			std::cout << t * dt << " " << this->Flux_Data[t] << " " << Phy2 << " " << this->EXP_Data[t] << std::endl;
+			std::cout << t * dt << " " << this->Flux_Data[t] << " " << T_e_new[0] << std::endl;
+			//exit(0);
 
 		}
 		output.close();

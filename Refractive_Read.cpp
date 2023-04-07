@@ -82,7 +82,7 @@ Refractive::Refractive(const char* EXP_file, ExpType file_type)
 			case PHASESHIFT_DATA://如果EXP_file文件里第二列已经是相位变化数据的话
 				for (unsigned int i = 0; i < Data.size(); ++i)
 				{
-					this->Flux_Data.push_back(0);
+					this->Flux_Data.push_back(Data[i][1]);
 					this->EXP_Data.push_back(Data[i][1]);
 				}
 				std::cout << "Phase change data loading complete!" << std::endl;
@@ -90,12 +90,118 @@ Refractive::Refractive(const char* EXP_file, ExpType file_type)
 			default:
 				break;
 		}
-
+		
 		//初始化基本参数
 		//初始X射线通量J/m^2
 	}
 	else
 	{
 		std::cout << "Data文件没找到或没数据！请再查看你的文件名！" << std::endl;
+	}
+}
+
+double Refractive::lifetime(string Element, double rho)
+{
+	double t = 0;
+	double r, p1, p2, p3, p4, p5, p6, p7;
+	r = rho / 1e6; //(cm-3)
+	//cout << r <<endl;
+	
+	if (Element == "Si")
+	{
+		p1 = -0.001098;
+		p2 = 0.05413;
+		p3 = -1.03;
+		p4 = 8.811;
+		p5 = -31.2;
+		
+		if (r < 1e12)
+		{
+			r = 1e12;
+		}
+		else if(r > 1e20)
+		{
+			r = 1e20;
+		}
+
+		r = log10(r);
+		t = p1*r*r*r*r + p2*r*r*r + p3*r*r + p4*r +p5;
+		t = pow(10,t);
+	}
+	else if (Element == "GaP")
+	{
+		p1 = 0.07434;
+		p2 = -7.7;
+		p3 = 332;
+		p4 = -7628;
+		p5 = 9.851e+04;
+		p6 = -6.779e+05;
+		p7 = 1.942e+06;
+
+		if (r < 3.893418e+016)
+		{
+			r = 3.893418e+016;
+		}
+		else if(r > 4.915596e+018)
+		{
+			r = 4.915596e+018;
+		}
+
+		r = log10(r);
+		t = p1*r*r*r*r*r*r + p2*r*r*r*r*r + p3*r*r*r*r + p4*r*r*r + p5*r*r + p6*r +p7;
+		t = pow(10,t);
+	}
+	else if (Element == "SiC")
+	{
+		p1 = -6.103e-19;
+		p2 = 6.814e-05;
+
+		if (r < 4.020294e12)
+		{
+			r = 4.020294e12;
+		}
+		else if(r > 1.114962e14)
+		{
+			r = 1.114962;
+		}
+		t = p1*r + p2;
+	}
+	else if (Element == "GaSb")
+	{
+		p1 = -1.983e-25;
+		p2 = 2.447e-07;
+
+		if (r < 3.986364e17)
+		{
+			r = 3.986364e17;
+		}
+		else if(r > 1.132955e18)
+		{
+			r = 1.132955e18;
+		}
+		t = p1*r + p2;
+	}
+	else
+	{
+		cout << Element + "lifetime loss!!!" << endl;
+		exit(0);
+	}
+
+	//cout << t <<endl;
+	////exit(0);
+	return t;
+}
+
+void Refractive::Material_Parameter(string Material)
+{
+	if (Material == "GaAs")
+	{
+		this->a[0] = 1.519;
+		this->a[1] = 5.405e-4;
+		this->a[2] = 204;
+		this->tao = 5.e-8;
+		this->vs = 4.73;
+		this->G = Pi*Pi/6*m_e*vs*vs/tao;
+		 cout << this->G << endl;
 	}
 }

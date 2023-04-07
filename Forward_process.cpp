@@ -1,67 +1,5 @@
 #include "Refractive.h"
 
-double Refractive::lifetime(string Element, double rho)
-{
-	double t = 0;
-	double r, p1, p2, p3, p4, p5, p6, p7;
-	r = rho * 1e6;
-	//cout << r <<endl;
-	
-	if (Element == "Si")
-	{
-		p1 = -0.001098;
-		p2 = 0.05413;
-		p3 = -1.03;
-		p4 = 8.811;
-		p5 = -31.2;
-		
-		if (rho < 1e12)
-		{
-			r = 1e12 * 1e6;
-		}
-		else if(rho > 1e20)
-		{
-			r = 1e20 * 1e6;
-		}
-
-		r = log10(r);
-		t = p1*r*r*r*r + p2*r*r*r + p3*r*r + p4*r +p5;
-		t = pow(10,t);
-	}
-	else if (Element == "GaP")
-	{
-		p1 = 0.07434;
-		p2 = -7.7;
-		p3 = 332;
-		p4 = -7628;
-		p5 = 9.851e+04;
-		p6 = -6.779e+05;
-		p7 = 1.942e+06;
-
-		if (rho < 3.893418e+016)
-		{
-			r = 3.893418e+016 * 1e6;
-		}
-		else if(rho > 4.915596e+018)
-		{
-			r = 4.915596e+018 * 1e6;
-		}
-
-		r = log10(r);
-		t = p1*r*r*r*r*r*r + p2*r*r*r*r*r + p3*r*r*r*r + p4*r*r*r + p5*r*r + p6*r +p7;
-		t = pow(10,t);
-	}
-	else
-	{
-		cout << Element + "lifetime loss!!!" << endl;
-		exit(0);
-	}
-
-	//cout << t <<endl;
-	////exit(0);
-	return t;
-}
-
 void Refractive::Forward_process(const char* Output_file,int jishu, double Energy,double Sample_thickness, double dx)
 {
 	ifstream filein;
@@ -76,7 +14,6 @@ void Refractive::Forward_process(const char* Output_file,int jishu, double Energ
     double dataPos[20];
     int num1, num2;
     double Eg;
-    double a[3];
 
     filein >> p;
     filein >> p; sscanf(p, "%lf", &dataPos[0]); filein >> p;
@@ -105,20 +42,13 @@ void Refractive::Forward_process(const char* Output_file,int jishu, double Energ
     filein >> p; sscanf(p, "%lf", &dataPos[0]); filein >> p;
     Eg = double(dataPos[0]); //带隙(eV)
     this->alpha = Energy / Eg;
-    for (int i = 0; i < 3; i++)
-    {
-        filein >> p; sscanf(p, "%lf", &dataPos[0]);
-        a[i] = double(dataPos[0]);//E_gap参数
-    }
-    filein >> p;
-
-    cout<<  a[1]<<endl;
 
     filein.close();
 
     double G_e = this->C_e / (this->C_e + this->C_l) / this->tao_e_l;
 	double G_l = this->C_l / (this->C_e + this->C_l) / this->tao_e_l;
 	double m_r = this->m_c * this->m_v / (this->m_c + this->m_v);
+	
 
 	double tao_e = this->tao_e_p / this->omega_detec;
 	double tao_h = this->tao_h_p / this->omega_detec;
@@ -167,12 +97,12 @@ void Refractive::Forward_process(const char* Output_file,int jishu, double Energ
 				if (i != 0 && i != (thick_size - 1))
 				{
 					T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx 
-						+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+						+ this->G * n_electron[i]  / this->T_l[i] * (this->T_e[i] - this->T_l[i])) * this->dt
 						+ this->T_l[i];
 	
 					T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 						+ this->lamda3 * this->n_s * this->sigma * this->Flux_Data[t] * exp(-this->n_s * this->sigma * (i) * this->dx)
-						- G_e * (this->T_e[i] - this->T_l[i])) * this->dt 
+						- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt 
 						+ this->T_e[i];
 				}
 				//在边界上的情况(第一类边界条件)
@@ -181,37 +111,37 @@ void Refractive::Forward_process(const char* Output_file,int jishu, double Energ
 					if (i == 0)
 					{
 						T_l_new[i] = (this->k_l * (this->T_l[i + 1] - 2 * this->T_l[i] + 300.) / this->dx / this->dx
-							+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+							+ this->G * n_electron[i]  / this->T_l[i] * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_l[i];
 	
 						T_e_new[i] = (this->k_e * (this->T_e[i + 1] - 2 * this->T_e[i] + 300.) / this->dx / this->dx
 							+ this->lamda3 * this->n_s * this->sigma * this->Flux_Data[t] * exp(-this->n_s * this->sigma * (i) * this->dx)
-							- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+							- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_e[i];
 					}
 					else
 					{
 						T_l_new[i] = (this->k_l * (300. - 2 * this->T_l[i] + this->T_l[i - 1]) / this->dx / this->dx
-							+ G_l * (this->T_e[i] - this->T_l[i])) * this->dt
+							+ this->G * n_electron[i]  / this->T_l[i] * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_l[i];
 	
 						T_e_new[i] = (this->k_e * (300. - 2 * this->T_e[i] + this->T_e[i - 1]) / this->dx / this->dx
 							+ this->lamda3 * this->n_s * this->sigma * this->Flux_Data[t] * exp(-this->n_s * this->sigma * (i) * this->dx)
-							- G_e * (this->T_e[i] - this->T_l[i])) * this->dt
+							- (this->G * n_electron[i]  / this->T_l[i]) * (this->T_e[i] - this->T_l[i])) * this->dt
 							+ this->T_e[i];
 					}
 				}
 
 				//3,电子密度
 				//this->gamma = 1 / lifetime(Element, n_electron[i]);
-				this->gamma = 3.7e+8;
+				this->gamma = 0.28e+9;
 
 				n_electron_new[i] = (-this->gamma * this->n_electron[i]
 					+ this->alpha * this->n_s * this->sigma / this->E_pump * this->Flux_Data[t] * exp(-this->n_s * this->sigma * (i) * this->dx)) * this->dt
 					+ this->n_electron[i];
 
 				//4,带隙
-				double E_gap = (a[0] - a[1] * T_l_new[i] * T_l_new[i] / (T_l_new[i] + a[2])) * e_0;
+				double E_gap = (this->a[0] - this->a[1] * T_l_new[i] * T_l_new[i] / (T_l_new[i] + this->a[2])) * e_0;
 				//double E_gap =1.42101;
 
 				//5,6,Ec和Ev
@@ -263,24 +193,16 @@ void Refractive::Forward_process(const char* Output_file,int jishu, double Energ
 
 				if (i == 0)
 				{
-					cout << t * dt << " " <<T_l_new[0] << " " << n_new[i] << endl;
+					cout << t * dt << " " << this->G * n_electron[i]  / this->T_l[i] << " " << T_e_new[0] << endl;
 				}
 				
 
 				if (n_new[i] > 10 || n_new[i] != n_new[i] || isinf(n_new[i]))
 			{
 				cout << "error" << " " << n_new[i] << endl;
-				output.close();
-				
-			}
-
-				
-				if (n_new[i] != n_new[i] || isinf(n_new[i]))
-			{
-				cout << "error!!!" << endl;
+				cout << "error" << " " << E_gap << endl;
 				output.close();
 				exit(0);
-				
 			}
 			}
 			//反射率

@@ -1,11 +1,9 @@
-Si
+GaAs
 1               			//num1
 1000			//FWHM(fs)
 1           			                 //num2
-1500		//energy(eV)
+2000		//energy(eV)
 1e-6				//thickmic(m)
 300e-6				//thick(m)
 5.75686e-24		                 //corssection(m^2)
 1.424           		                                  //Eg(eV)
-1.519   5.405e-4   204                               //E_gap
-

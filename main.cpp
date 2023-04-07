@@ -10,9 +10,12 @@ using namespace std;
 
 int main()
 {
-	Refractive* MineRefractive = new Refractive("multi.txt", PHASESHIFT_DATA);
-    //Refractive* MineRefractive = new Refractive("multi2.txt", PHASESHIFT_DATA);
+	//Refractive* MineRefractive = new Refractive("multi5.txt", PHASESHIFT_DATA);
+    //Refractive* MineRefractive = new Refractive("GaAsFlux3.dat", PHASESHIFT_DATA);
+    Refractive* MineRefractive = new Refractive("GaAsReExp2.dat", PHASESHIFT_DATA);
 	MineRefractive->omega_detec = 2 * Pi * c_0 / (1545.03e-9);
+
+    MineRefractive->Material_Parameter("GaAs");
 
 	ifstream filein;
 	filein.open("ini.txt");//
@@ -90,11 +93,13 @@ int main()
             for (unsigned int t = 0; t < MineRefractive->EXP_Data.size(); ++t)
             {
 
-                MineRefractive->Flux_Data[t] = 0.03 * 100000 * pow(E,-(t-mu[i])*(t-mu[i])/(2*si[i]*si[i]))/(2.50662827463*si[i])/1e-12;
+                //MineRefractive->Flux_Data[t] = 0.03 * 20000 * pow(E,-(t-mu[i])*(t-mu[i])/(2*si[i]*si[i]))/(2.50662827463*si[i])/1e-12;
                 //MineRefractive->Flux_Data[1] = 0.003 * 10000 / MineRefractive->dt;
+                //MineRefractive->Flux_Data[t] = -MineRefractive->Flux_Data[t];
+                //cout<<MineRefractive->Flux_Data[t]<<endl;
             }
-            MineRefractive->Forward_process("out.dat", i, energy[j]);
-			//MineRefractive->Reverse_process("out.dat");
+            //MineRefractive->Forward_process("GaAsFlux3.dat", i, energy[j]);
+			MineRefractive->Reverse_process("GaAsFlux2.dat");
         }
     }
 
